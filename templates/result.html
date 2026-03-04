@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Result - Crowd Detection{% endblock %}
+
+{% block content %}
+<div class="result-section">
+    <div class="result-card">
+        <h1>✅ Detection Complete</h1>
+        <div class="result-count">
+            <span class="count-number">{{ head_count }}</span>
+            <span class="count-label">People Detected</span>
+        </div>
+        <p class="result-event">Event: <strong>{{ event }}</strong></p>
+        <div class="result-image-container">
+            <img src="{{ result_image }}" alt="Detection Result" class="result-image">
+        </div>
+        <p class="redirect-msg">Redirecting to upload page in <span id="countdown">7</span> seconds...</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">← Upload Another</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let seconds = 7;
+    const countdownEl = document.getElementById('countdown');
+    const timer = setInterval(() => {
+        seconds--;
+        countdownEl.textContent = seconds;
+        if (seconds <= 0) {
+            clearInterval(timer);
+            window.location.href = "{{ url_for('index') }}";
+        }
+    }, 1000);
+</script>
+{% endblock %}
