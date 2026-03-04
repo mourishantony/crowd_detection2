@@ -11,14 +11,64 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadForm = document.getElementById('uploadForm');
     const loadingOverlay = document.getElementById('loadingOverlay');
     const submitBtn = document.getElementById('submitBtn');
-    const resultModal = document.getElementById('resultModal');
-    const resultCount = document.getElementById('resultCount');
-    const resultEvent = document.getElementById('resultEvent');
-    const closeModal = document.getElementById('closeModal');
-    const countdownEl = document.getElementById('countdown');
+    const successMessage = document.getElementById('successMessage');
+    const placeInput = document.getElementById('placeInput');
+    const placeList = document.getElementById('placeList');
+    const comboboxToggle = document.getElementById('comboboxToggle');
 
     let stream = null;
-    let countdownTimer = null;
+
+    // Combobox functionality
+    if (placeInput && placeList && comboboxToggle) {
+        const listItems = placeList.querySelectorAll('li');
+        
+        // Toggle dropdown
+        comboboxToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            placeList.classList.toggle('show');
+            if (placeList.classList.contains('show')) {
+                placeInput.focus();
+            }
+        });
+        
+        // Show dropdown on input focus
+        placeInput.addEventListener('focus', () => {
+            placeList.classList.add('show');
+            filterList('');
+        });
+        
+        // Filter list as user types
+        placeInput.addEventListener('input', () => {
+            filterList(placeInput.value);
+        });
+        
+        // Select item on click
+        listItems.forEach(item => {
+            item.addEventListener('click', () => {
+                placeInput.value = item.dataset.value;
+                placeList.classList.remove('show');
+            });
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.combobox-wrapper')) {
+                placeList.classList.remove('show');
+            }
+        });
+        
+        function filterList(query) {
+            const q = query.toLowerCase();
+            listItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(q) || q === '') {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        }
+    }
 
     // Click to browse files
     uploadArea.addEventListener('click', () => {
@@ -118,6 +168,13 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        // Validate place
+        const place = placeInput ? placeInput.value.trim() : '';
+        if (!place) {
+            alert('Please enter or select a place.');
+            return;
+        }
+
         if (!imageInput.files || imageInput.files.length === 0) {
             alert('Please select or capture an image first.');
             return;
@@ -139,11 +196,12 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.disabled = false;
 
             if (data.success) {
-                resultCount.textContent = data.head_count;
-                resultEvent.textContent = data.event;
-                resultModal.style.display = 'flex';
+                // Show success toast
+                successMessage.style.display = 'flex';
                 resetForm();
-                startCountdown();
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 2000);
             } else {
                 alert(data.error || 'An error occurred.');
             }
@@ -153,31 +211,4 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Upload failed: ' + err.message);
         }
     });
-
-    // Modal close
-    closeModal.addEventListener('click', () => {
-        resultModal.style.display = 'none';
-        if (countdownTimer) clearInterval(countdownTimer);
-    });
-
-    resultModal.addEventListener('click', (e) => {
-        if (e.target === resultModal) {
-            resultModal.style.display = 'none';
-            if (countdownTimer) clearInterval(countdownTimer);
-        }
-    });
-
-    function startCountdown() {
-        let seconds = 5;
-        countdownEl.textContent = seconds;
-        if (countdownTimer) clearInterval(countdownTimer);
-        countdownTimer = setInterval(() => {
-            seconds--;
-            countdownEl.textContent = seconds;
-            if (seconds <= 0) {
-                clearInterval(countdownTimer);
-                resultModal.style.display = 'none';
-            }
-        }, 1000);
-    }
 });

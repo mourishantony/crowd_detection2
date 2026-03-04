@@ -58,9 +58,17 @@ def index():
 @app.route("/upload", methods=["POST"])
 def upload():
     events = config.load_events()
-    event = request.form.get("event")
-    if not event or event not in events:
-        return jsonify({"success": False, "error": "Please select a valid event."}), 400
+    place = request.form.get("place", "").strip()
+    
+    if not place:
+        return jsonify({"success": False, "error": "Please enter a place name."}), 400
+    
+    # Add to events list if new place
+    if place not in events:
+        events.append(place)
+        config.save_events(events)
+    
+    event = place
 
     file = request.files.get("image")
     if not file or file.filename == "":
