@@ -10,15 +10,6 @@
   },
   {
     "event": "Place 1",
-    "filename": "20260304_151037_camera_capture.jpg",
-    "filepath": "C:\\Users\\mourish\\Desktop\\crowd_detection2\\uploads\\place_1\\20260304_151037_camera_capture.jpg",
-    "result_image": "C:\\Users\\mourish\\Desktop\\crowd_detection2\\uploads\\place_1\\20260304_151037_camera_capture_result.jpg",
-    "head_count": 2,
-    "timestamp": "2026-03-04T15:10:39.624838",
-    "id": 2
-  },
-  {
-    "event": "Place 1",
     "filename": "20260304_151816_ahahahahha.jpeg",
     "filepath": "C:\\Users\\mourish\\Desktop\\crowd_detection2\\uploads\\place_1\\20260304_151816_ahahahahha.jpeg",
     "head_count": 25,
