@@ -1,0 +1,17 @@
+# Web framework
+Flask==3.0.0
+Werkzeug==3.0.1
+
+# Computer vision
+opencv-python==4.11.0.86
+
+# Object / person detection (YOLOv8)
+ultralytics>=8.0.0
+
+# Deep learning backend (required by ultralytics)
+torch==2.10.0
+torchvision==0.25.0
+
+# Image processing & numerical computing
+Pillow==11.3.0
+numpy==2.2.6
