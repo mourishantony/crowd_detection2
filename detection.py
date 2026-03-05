@@ -1,8 +1,10 @@
 import cv2
 import os
 import urllib.request
-from ultralytics import YOLO
 import config
+
+# YOLO is imported lazily inside _detect_bodies() so Flask starts instantly
+# without waiting for PyTorch / CUDA to initialise.
 
 
 def _ensure_yunet_model():
@@ -16,6 +18,7 @@ def _ensure_yunet_model():
 
 def _detect_bodies(image):
     """Detect people using YOLOv8m (works from any angle)."""
+    from ultralytics import YOLO          # lazy — avoids CUDA init at Flask startup
     model = YOLO(config.YOLO_MODEL)
     results = model(image, conf=0.25, iou=0.5, classes=[0], verbose=False, imgsz=1280)
     boxes = []
@@ -51,10 +54,52 @@ def _box_overlap(box_a, box_b):
     return box_b[0] <= cx <= box_b[2] and box_b[1] <= cy <= box_b[3]
 
 
+def _draw_annotations(image, merged_boxes, head_count):
+    """Draw bounding boxes and count label on a copy of the image."""
+    annotated = image.copy()
+    h, w = annotated.shape[:2]
+
+    # Color scheme: body = blue, face-only = green
+    BODY_COLOR = (235, 99, 37)    # BGR: orange-blue
+    FACE_COLOR = (46, 185, 16)    # BGR: green
+
+    for box in merged_boxes:
+        x1, y1, x2, y2, conf, label = box
+        color = BODY_COLOR if label == "body" else FACE_COLOR
+        thickness = max(2, int(min(w, h) / 400))
+
+        # Draw rectangle
+        cv2.rectangle(annotated, (x1, y1), (x2, y2), color, thickness)
+
+        # Draw small confidence badge
+        badge_text = f"{conf:.0%}"
+        font_scale = max(0.35, min(w, h) / 2000)
+        (tw, th), baseline = cv2.getTextSize(badge_text, cv2.FONT_HERSHEY_SIMPLEX, font_scale, 1)
+        bx1 = x1
+        by1 = max(0, y1 - th - baseline - 4)
+        cv2.rectangle(annotated, (bx1, by1), (bx1 + tw + 6, y1), color, -1)
+        cv2.putText(annotated, badge_text, (bx1 + 3, y1 - baseline - 2),
+                    cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), 1, cv2.LINE_AA)
+
+    # Draw total count banner at the top
+    banner_h = max(36, int(h * 0.055))
+    cv2.rectangle(annotated, (0, 0), (w, banner_h), (30, 30, 30), -1)
+    banner_text = f"People Detected: {head_count}"
+    font_scale_banner = max(0.6, min(w, h) / 1200)
+    (bw, bh), _ = cv2.getTextSize(banner_text, cv2.FONT_HERSHEY_SIMPLEX, font_scale_banner, 2)
+    bx = max(10, (w - bw) // 2)
+    by = (banner_h + bh) // 2
+    cv2.putText(annotated, banner_text, (bx, by),
+                cv2.FONT_HERSHEY_SIMPLEX, font_scale_banner, (255, 255, 255), 2, cv2.LINE_AA)
+
+    return annotated
+
+
 def count_people(image_path):
     """
     Run dual detection (body + face) on an image.
-    Returns: head count (int)
+    Saves an annotated copy with bounding boxes in the same folder.
+    Returns: (head_count: int, annotated_filename: str)
     """
     image = cv2.imread(image_path)
     if image is None:
@@ -71,4 +116,15 @@ def count_people(image_path):
         if not already_covered:
             merged.append(fb)
 
-    return len(merged)
+    head_count = len(merged)
+
+    # Build annotated image and save alongside the original
+    annotated = _draw_annotations(image, merged, head_count)
+    folder = os.path.dirname(image_path)
+    original_name = os.path.basename(image_path)
+    name_no_ext, ext = os.path.splitext(original_name)
+    annotated_filename = f"annotated_{name_no_ext}.jpg"
+    annotated_path = os.path.join(folder, annotated_filename)
+    cv2.imwrite(annotated_path, annotated, [cv2.IMWRITE_JPEG_QUALITY, 90])
+
+    return head_count, annotated_filename

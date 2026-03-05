@@ -11,20 +11,6 @@
             </h1>
             <p class="text-muted" style="margin-top: 4px;">Overview of crowd detection analytics</p>
         </div>
-        <div class="header-actions">
-            <a href="{{ url_for('admin_photos') }}" class="btn btn-outline">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                Photos
-            </a>
-            <a href="{{ url_for('admin_places') }}" class="btn btn-outline">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                Places
-            </a>
-            <a href="{{ url_for('admin_logout') }}" class="btn btn-danger">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                Logout
-            </a>
-        </div>
     </div>
 
     <!-- Overall Stats -->
@@ -111,7 +97,7 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             Edit
                         </a>
-                        <form method="POST" action="{{ url_for('admin_delete_record', record_id=record.id) }}" style="display:inline;" onsubmit="return confirm('Delete this record?')">
+                        <form method="POST" action="{{ url_for('admin_delete_record', record_id=record.id) }}" style="display:inline;" data-confirm="Delete this record? This action cannot be undone.">
                             <button type="submit" class="btn-sm btn-danger">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                                 Delete

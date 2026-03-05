@@ -89,7 +89,7 @@ def upload():
 
     # Run detection
     try:
-        head_count = count_people(filepath)
+        head_count, annotated_filename = count_people(filepath)
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
@@ -99,6 +99,7 @@ def upload():
         "id": len(records) + 1,
         "event": event,
         "filename": filename,
+        "annotated_filename": annotated_filename,
         "filepath": filepath,
         "head_count": head_count,
         "timestamp": datetime.now().isoformat()
@@ -202,12 +203,16 @@ def admin_photos():
     else:
         filtered = records
 
-    # Add image URL to each record
+    # Add image URL and annotated URL to each record
     for r in filtered:
         event_folder = r["event"].replace(" ", "_").lower()
         r["image_url"] = url_for("uploaded_file",
                                   event_folder=event_folder,
                                   filename=r["filename"])
+        ann = r.get("annotated_filename")
+        r["annotated_url"] = url_for("uploaded_file",
+                                      event_folder=event_folder,
+                                      filename=ann) if ann else r["image_url"]
 
     return render_template("admin/photos.html",
                            records=list(reversed(filtered)),

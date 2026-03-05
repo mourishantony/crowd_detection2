@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
             closeCameraBtn.style.display = 'inline-block';
             openCameraBtn.style.display = 'none';
         } catch (err) {
-            alert('Could not access camera: ' + err.message);
+            PhoenixAlert('Could not access camera: ' + err.message, 'error');
         }
     });
 
@@ -171,12 +171,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Validate place
         const place = placeInput ? placeInput.value.trim() : '';
         if (!place) {
-            alert('Please enter or select a place.');
+            PhoenixAlert('Please enter or select a place.', 'error');
             return;
         }
 
         if (!imageInput.files || imageInput.files.length === 0) {
-            alert('Please select or capture an image first.');
+            PhoenixAlert('Please select or capture an image first.', 'error');
             return;
         }
 
@@ -203,12 +203,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     successMessage.style.display = 'none';
                 }, 2000);
             } else {
-                alert(data.error || 'An error occurred.');
+                PhoenixAlert(data.error || 'An error occurred.', 'error');
             }
         } catch (err) {
             loadingOverlay.style.display = 'none';
             submitBtn.disabled = false;
-            alert('Upload failed: ' + err.message);
+            PhoenixAlert('Upload failed: ' + err.message, 'error');
         }
     });
 });

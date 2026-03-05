@@ -1,14 +1,5 @@
 [
   {
-    "event": "Place 2",
-    "filename": "20260304_151013_Screenshot_2026-03-04_131128.png",
-    "filepath": "C:\\Users\\mourish\\Desktop\\crowd_detection2\\uploads\\place_2\\20260304_151013_Screenshot_2026-03-04_131128.png",
-    "result_image": "C:\\Users\\mourish\\Desktop\\crowd_detection2\\uploads\\place_2\\20260304_151013_Screenshot_2026-03-04_131128_result.png",
-    "head_count": 53,
-    "timestamp": "2026-03-04T15:10:15.266045",
-    "id": 1
-  },
-  {
     "event": "Place 1",
     "filename": "20260304_151816_ahahahahha.jpeg",
     "filepath": "C:\\Users\\mourish\\Desktop\\crowd_detection2\\uploads\\place_1\\20260304_151816_ahahahahha.jpeg",
@@ -25,19 +16,44 @@
     "timestamp": "2026-03-04T16:44:02.099314"
   },
   {
-    "id": 6,
-    "event": "ground",
-    "filename": "20260304_164841_IMG_6.jpg",
-    "filepath": "C:\\Users\\mourish\\Desktop\\crowd_detection2\\uploads\\ground\\20260304_164841_IMG_6.jpg",
-    "head_count": 113,
-    "timestamp": "2026-03-04T16:48:42.719007"
-  },
-  {
     "id": 7,
     "event": "auditorium",
     "filename": "20260304_165113_cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTAzL3JtMTItMS1mb24tMzYtbC1qb2IxNzE1LnBuZw.webp",
     "filepath": "C:\\Users\\mourish\\Desktop\\crowd_detection2\\uploads\\auditorium\\20260304_165113_cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTAzL3JtMTItMS1mb24tMzYtbC1qb2IxNzE1LnBuZw.webp",
     "head_count": 54,
     "timestamp": "2026-03-04T16:51:15.414806"
+  },
+  {
+    "id": 4,
+    "event": "Ggg",
+    "filename": "20260304_171946_17726249614204758850246195321255.jpg",
+    "filepath": "C:\\Users\\mourish\\Desktop\\crowd_detection2\\uploads\\ggg\\20260304_171946_17726249614204758850246195321255.jpg",
+    "head_count": 25,
+    "timestamp": "2026-03-04T17:19:48.974283"
+  },
+  {
+    "id": 5,
+    "event": "Place 3",
+    "filename": "20260304_235858_50.jpg",
+    "filepath": "C:\\Users\\mourish\\Desktop\\crowd_detection2\\uploads\\place_3\\20260304_235858_50.jpg",
+    "head_count": 31,
+    "timestamp": "2026-03-04T23:59:00.828921"
+  },
+  {
+    "id": 6,
+    "event": "Place 3",
+    "filename": "20260304_235918_100people.jpg",
+    "filepath": "C:\\Users\\mourish\\Desktop\\crowd_detection2\\uploads\\place_3\\20260304_235918_100people.jpg",
+    "head_count": 102,
+    "timestamp": "2026-03-04T23:59:20.175953"
+  },
+  {
+    "id": 7,
+    "event": "Place 3",
+    "filename": "20260305_002155_Picture1.png",
+    "annotated_filename": "annotated_20260305_002155_Picture1.jpg",
+    "filepath": "C:\\Users\\mourish\\Desktop\\crowd_detection2\\uploads\\place_3\\20260305_002155_Picture1.png",
+    "head_count": 1,
+    "timestamp": "2026-03-05T00:21:58.026192"
   }
 ]
