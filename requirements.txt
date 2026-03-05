@@ -1,3 +1,20 @@
-numpy==2.0.2
-# Add other requirements here if needed
+# Web framework
+Flask==3.0.0
+Werkzeug==3.0.1
+
+# App server (Render / production)
 gunicorn==22.0.0
+
+# Computer vision
+opencv-python-headless==4.11.0.86
+
+# Object / person detection (YOLOv8)
+ultralytics>=8.0.0
+
+# Deep learning backend (required by ultralytics)
+torch==2.2.2
+torchvision==0.17.2
+
+# Image processing & numerical computing
+Pillow==11.3.0
+numpy==2.0.2
