@@ -27,7 +27,7 @@ os.makedirs(config.UPLOAD_FOLDER, exist_ok=True)
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in config.ALLOWED_EXTENSIONS
-
+  
 
 # ────────────── Common User Routes ──────────────
 
