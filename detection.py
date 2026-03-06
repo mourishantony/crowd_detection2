@@ -3,8 +3,16 @@ import os
 import urllib.request
 import config
 
-# YOLO is imported lazily inside _detect_bodies() so Flask starts instantly
-# without waiting for PyTorch / CUDA to initialise.
+# YOLO model is loaded once and cached to avoid reloading on every request.
+_yolo_model = None
+
+
+def _get_yolo_model():
+    global _yolo_model
+    if _yolo_model is None:
+        from ultralytics import YOLO
+        _yolo_model = YOLO(config.YOLO_MODEL)
+    return _yolo_model
 
 
 def _ensure_yunet_model():
@@ -18,9 +26,8 @@ def _ensure_yunet_model():
 
 def _detect_bodies(image):
     """Detect people using YOLOv8m (works from any angle)."""
-    from ultralytics import YOLO          # lazy — avoids CUDA init at Flask startup
-    model = YOLO(config.YOLO_MODEL)
-    results = model(image, conf=0.25, iou=0.5, classes=[0], verbose=False, imgsz=1280)
+    model = _get_yolo_model()
+    results = model(image, conf=0.25, iou=0.5, classes=[0], verbose=False, imgsz=640)
     boxes = []
     for box in results[0].boxes:
         x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
