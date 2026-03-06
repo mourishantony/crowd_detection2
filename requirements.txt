@@ -18,6 +18,9 @@ torchvision==0.17.2
 # MongoDB Atlas
 pymongo[srv]>=4.6,<5
 
+# Environment variables
+python-dotenv>=1.0.0
+
 # Cloud image storage
 cloudinary>=1.36,<2
 
