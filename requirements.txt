@@ -5,15 +5,8 @@ Werkzeug==3.0.1
 # App server (Render / production)
 gunicorn==22.0.0
 
-# Computer vision
-opencv-python-headless==4.11.0.86
-
-# Object / person detection (YOLOv8)
-ultralytics>=8.0.0
-
-# Deep learning backend (required by ultralytics)
-torch==2.2.2
-torchvision==0.17.2
+# HTTP client for model API (runs on Hugging Face Spaces)
+requests>=2.31.0
 
 # MongoDB Atlas
 pymongo[srv]>=4.6,<5

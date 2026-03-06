@@ -1,53 +1,30 @@
-import cv2
+import base64
 import os
-import urllib.request
-import config
+import requests
 
-# YOLO model is loaded once and cached to avoid reloading on every request.
-_yolo_model = None
-
-
-def _get_yolo_model():
-    global _yolo_model
-    if _yolo_model is None:
-        from ultralytics import YOLO
-        _yolo_model = YOLO(config.YOLO_MODEL)
-    return _yolo_model
+MODEL_API_URL = os.environ.get(
+    "MODEL_API_URL",
+    "https://mourishantony-crowd-detection-model.hf.space/detect"
+)
 
 
-def _ensure_yunet_model():
-    """Download YuNet model if not present."""
-    if not os.path.exists(config.YUNET_MODEL):
-        os.makedirs(config.MODELS_FOLDER, exist_ok=True)
-        print("Downloading YuNet face detection model...")
-        urllib.request.urlretrieve(config.YUNET_URL, config.YUNET_MODEL)
-        print("Download complete.")
+def count_people(image_path):
+    """
+    Send image to the HF Space model API.
+    Returns: (head_count: int, annotated_bytes: bytes)
+    """
+    with open(image_path, "rb") as f:
+        response = requests.post(MODEL_API_URL, files={"image": f}, timeout=120)
+    response.raise_for_status()
+    data = response.json()
+    annotated_bytes = base64.b64decode(data["annotated_image"])
+    return data["head_count"], annotated_bytes
 
 
-def _detect_bodies(image):
-    """Detect people using YOLOv8m (works from any angle)."""
-    model = _get_yolo_model()
-    results = model(image, conf=0.25, iou=0.5, classes=[0], verbose=False, imgsz=416)
-    boxes = []
-    for box in results[0].boxes:
-        x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
-        conf = box.conf[0].item()
-        boxes.append((x1, y1, x2, y2, conf, "body"))
-    return boxes
-
-
-def _detect_faces(image):
-    """Detect faces using YuNet (catches front-facing people body detection may miss)."""
-    _ensure_yunet_model()
-    h, w = image.shape[:2]
-    detector = cv2.FaceDetectorYN.create(
-        config.YUNET_MODEL, "", (w, h),
-        score_threshold=0.5, nms_threshold=0.3, top_k=5000
-    )
-    _, faces = detector.detect(image)
-    boxes = []
-    if faces is not None:
-        for face in faces:
+# ── kept for unused import safety ──────────────────────────────────────────
+if False:
+    def _detect_faces(image):
+        for face in []:  # dead code — never runs
             x, y, fw, fh = map(int, face[:4])
             conf = face[-1]
             boxes.append((x, y, x + fw, y + fh, conf, "face"))
