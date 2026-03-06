@@ -21,21 +21,7 @@ def count_people(image_path):
     return data["head_count"], annotated_bytes
 
 
-# ── kept for unused import safety ──────────────────────────────────────────
-if False:
-    def _detect_faces(image):
-        for face in []:  # dead code — never runs
-            x, y, fw, fh = map(int, face[:4])
-            conf = face[-1]
-            boxes.append((x, y, x + fw, y + fh, conf, "face"))
-    return boxes
 
-
-def _box_overlap(box_a, box_b):
-    """Check if center of box_a falls inside box_b."""
-    cx = (box_a[0] + box_a[2]) // 2
-    cy = (box_a[1] + box_a[3]) // 2
-    return box_b[0] <= cx <= box_b[2] and box_b[1] <= cy <= box_b[3]
 
 
 def _draw_annotations(image, merged_boxes, head_count):
