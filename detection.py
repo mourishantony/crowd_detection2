@@ -105,8 +105,8 @@ def _draw_annotations(image, merged_boxes, head_count):
 def count_people(image_path):
     """
     Run dual detection (body + face) on an image.
-    Saves an annotated copy with bounding boxes in the same folder.
-    Returns: (head_count: int, annotated_filename: str)
+    Returns: (head_count: int, annotated_bytes: bytes)  — JPEG bytes in memory.
+    The caller is responsible for uploading/storing the bytes.
     """
     image = cv2.imread(image_path)
     if image is None:
@@ -125,13 +125,9 @@ def count_people(image_path):
 
     head_count = len(merged)
 
-    # Build annotated image and save alongside the original
+    # Encode annotated image to JPEG bytes in memory — no disk write
     annotated = _draw_annotations(image, merged, head_count)
-    folder = os.path.dirname(image_path)
-    original_name = os.path.basename(image_path)
-    name_no_ext, ext = os.path.splitext(original_name)
-    annotated_filename = f"annotated_{name_no_ext}.jpg"
-    annotated_path = os.path.join(folder, annotated_filename)
-    cv2.imwrite(annotated_path, annotated, [cv2.IMWRITE_JPEG_QUALITY, 90])
+    _, buffer = cv2.imencode(".jpg", annotated, [cv2.IMWRITE_JPEG_QUALITY, 90])
+    return head_count, buffer.tobytes()
 
-    return head_count, annotated_filename
+

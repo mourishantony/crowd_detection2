@@ -15,6 +15,12 @@ ultralytics>=8.0.0
 torch==2.2.2
 torchvision==0.17.2
 
+# MongoDB Atlas
+pymongo[srv]>=4.6,<5
+
+# Cloud image storage
+cloudinary>=1.36,<2
+
 # Image processing & numerical computing
 Pillow==11.3.0
 numpy==1.26.4
