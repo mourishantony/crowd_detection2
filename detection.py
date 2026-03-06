@@ -27,7 +27,7 @@ def _ensure_yunet_model():
 def _detect_bodies(image):
     """Detect people using YOLOv8m (works from any angle)."""
     model = _get_yolo_model()
-    results = model(image, conf=0.25, iou=0.5, classes=[0], verbose=False, imgsz=640)
+    results = model(image, conf=0.25, iou=0.5, classes=[0], verbose=False, imgsz=416)
     boxes = []
     for box in results[0].boxes:
         x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())

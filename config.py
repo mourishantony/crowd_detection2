@@ -13,7 +13,7 @@ UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 MODELS_FOLDER = os.path.join(BASE_DIR, "models")
 
 # Detection model paths
-YOLO_MODEL = os.path.join(MODELS_FOLDER, "yolov8m.pt")
+YOLO_MODEL = os.path.join(MODELS_FOLDER, "yolov8n.pt")
 YUNET_MODEL = os.path.join(MODELS_FOLDER, "face_detection_yunet_2023mar.onnx")
 YUNET_URL = "https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx"
 
