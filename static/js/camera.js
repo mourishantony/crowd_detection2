@@ -89,38 +89,71 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         uploadArea.style.borderColor = '#d1d5db';
         if (e.dataTransfer.files.length > 0) {
-            let file = e.dataTransfer.files[0];
-            file = await convertHeicIfNeeded(file);
-            setFileInput(file);
-            showPreview(file);
+            try {
+                let file = e.dataTransfer.files[0];
+                file = await convertHeicIfNeeded(file);
+                setFileInput(file);
+                showPreview(file);
+            } catch (_) {
+                // conversion error already shown to user
+            }
         }
     });
 
     // File selected
     imageInput.addEventListener('change', async () => {
         if (imageInput.files.length > 0) {
-            let file = imageInput.files[0];
-            file = await convertHeicIfNeeded(file);
-            setFileInput(file);
-            showPreview(file);
+            try {
+                let file = imageInput.files[0];
+                file = await convertHeicIfNeeded(file);
+                setFileInput(file);
+                showPreview(file);
+            } catch (_) {
+                // conversion error already shown to user
+                imageInput.value = '';
+            }
         }
     });
 
     // Convert HEIC/HEIF to JPEG in the browser before uploading
     async function convertHeicIfNeeded(file) {
-        const name = file.name.toLowerCase();
+        const name = (file.name || '').toLowerCase();
+        const type = (file.type || '').toLowerCase();
         const isHeic = name.endsWith('.heic') || name.endsWith('.heif') ||
-                       file.type === 'image/heic' || file.type === 'image/heif';
-        if (!isHeic || typeof heic2any === 'undefined') return file;
+                       type === 'image/heic' || type === 'image/heif' ||
+                       type === '';
+
+        // If type is empty, check magic bytes in the file header
+        let confirmedHeic = isHeic;
+        if (type === '' && !name.endsWith('.heic') && !name.endsWith('.heif')) {
+            try {
+                const header = await file.slice(0, 12).arrayBuffer();
+                const view = new Uint8Array(header);
+                // HEIF magic: bytes 4-8 = 'ftyp'
+                if (view.length >= 12 &&
+                    view[4] === 0x66 && view[5] === 0x74 && view[6] === 0x79 && view[7] === 0x70) {
+                    const brand = String.fromCharCode(view[8], view[9], view[10], view[11]).toLowerCase();
+                    confirmedHeic = ['heic', 'heix', 'mif1', 'msf1', 'hevc'].includes(brand);
+                } else {
+                    confirmedHeic = false;
+                }
+            } catch (_) {
+                confirmedHeic = false;
+            }
+        }
+
+        if (!confirmedHeic || typeof heic2any === 'undefined') return file;
 
         try {
             const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.92 });
             const converted = Array.isArray(blob) ? blob[0] : blob;
-            const newName = file.name.replace(/\.heic$|\.heif$/i, '.jpg');
-            return new File([converted], newName, { type: 'image/jpeg' });
+            const newName = name.replace(/\.heic$|\.heif$/i, '') + '.jpg';
+            return new File([converted], newName || 'converted.jpg', { type: 'image/jpeg' });
         } catch (e) {
-            console.warn('Client-side HEIC conversion failed, uploading original:', e);
-            return file;
+            console.error('Client-side HEIC conversion failed:', e);
+            // Don't silently return original — tell the user
+            ipsAlert('Could not convert HEIC image in browser. Please try converting to JPEG first.', 'error');
+            throw e;
         }
     }
 
@@ -212,6 +245,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         loadingOverlay.style.display = 'flex';
         submitBtn.disabled = true;
+
+        // Safety net: convert HEIC at submit time in case it wasn't converted on file select
+        try {
+            let file = imageInput.files[0];
+            file = await convertHeicIfNeeded(file);
+            setFileInput(file);
+        } catch (_) {
+            loadingOverlay.style.display = 'none';
+            submitBtn.disabled = false;
+            return;
+        }
 
         const formData = new FormData(uploadForm);
 

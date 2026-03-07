@@ -28,6 +28,17 @@ cloudinary.config(
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
 
+# Global error handler — always return JSON for AJAX requests
+@app.errorhandler(Exception)
+def handle_exception(e):
+    if request.accept_mimetypes.best == 'application/json' or request.is_json or request.path == '/upload':
+        return jsonify({"success": False, "error": f"Internal server error: {str(e)}"}), 500
+    return str(e), 500
+
+@app.errorhandler(413)
+def handle_too_large(e):
+    return jsonify({"success": False, "error": "File too large."}), 413
+
 # Temp folder for images during detection (deleted immediately after)
 os.makedirs(config.UPLOAD_FOLDER, exist_ok=True)
 
@@ -73,8 +84,22 @@ def upload():
     filepath = os.path.join(config.UPLOAD_FOLDER, f"{timestamp}_{original_filename}")
     file.save(filepath)
 
+    # Detect HEIC/HEIF by file content (magic bytes) — iOS may not set extension
+    is_heic = ext in ("heic", "heif")
+    if not is_heic:
+        try:
+            with open(filepath, "rb") as fh:
+                header = fh.read(12)
+            # HEIF/HEIC files contain 'ftyp' at byte 4, followed by heic/heix/mif1/msf1
+            if len(header) >= 12 and header[4:8] == b'ftyp':
+                brand = header[8:12].decode('ascii', errors='ignore').lower()
+                if brand in ('heic', 'heix', 'mif1', 'msf1', 'hevc'):
+                    is_heic = True
+        except Exception:
+            pass
+
     # Convert HEIC/HEIF to JPEG so the detection model can process it
-    if ext in ("heic", "heif"):
+    if is_heic:
         if not HEIC_SUPPORTED:
             try:
                 os.remove(filepath)

@@ -4,6 +4,8 @@ FROM python:3.11-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libffi-dev \
     libgomp1 \
+    libde265-dev \
+    libheif-dev \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . /app
