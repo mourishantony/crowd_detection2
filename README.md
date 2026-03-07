@@ -1,59 +1,32 @@
-# IPS Tech Community â€” Crowd Detection System
+# IPS Tech Community ÔÇö Crowd Detection System
 
-A Flask web application that counts people in images using a remote detection API deployed on Hugging Face Spaces. The Flask app sends images to the model API, which runs YOLOv8 + YuNet detection and returns annotated images with head counts. Annotated images are stored permanently on Cloudinary, and all records are persisted in MongoDB Atlas â€” surviving across deployments.
+A Flask web application that counts people in images using YOLOv8 object detection and YuNet face detection. Annotated images are stored permanently on Cloudinary, and all records are persisted in MongoDB Atlas ÔÇö surviving across deployments.
 
 ---
 
 ## Table of Contents
 
-- [Architecture Overview](#architecture-overview)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [How It Works](#how-it-works)
-- [Deploying the Model API on Hugging Face Spaces](#deploying-the-model-api-on-hugging-face-spaces)
 - [Local Development Setup](#local-development-setup)
 - [Environment Variables](#environment-variables)
-- [Deploying the Web App to Render](#deploying-the-web-app-to-render)
+- [Deploying to Render](#deploying-to-render)
 - [Admin Panel](#admin-panel)
 - [API Reference](#api-reference)
-- [Notes](#notes)
-
----
-
-## Architecture Overview
-
-IPS Tech Community uses a **two-service architecture**:
-
-```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚   Flask Web App         â”‚         â”‚   Model API (HF Spaces)          â”‚
-â”‚   (Render / local)      â”‚         â”‚   (Hugging Face Spaces)          â”‚
-â”‚                         â”‚  POST   â”‚                                  â”‚
-â”‚  User uploads image â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶  â”‚  YOLOv8m body detection          â”‚
-â”‚                         â”‚ /detect â”‚  YuNet face detection            â”‚
-â”‚  Receives annotated  â—€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€  â”‚  Merge + annotate + return       â”‚
-â”‚  image + head count     â”‚  JSON   â”‚                                  â”‚
-â”‚                         â”‚         â”‚  Returns: head_count +           â”‚
-â”‚  Stores to Cloudinary   â”‚         â”‚  base64 annotated JPEG           â”‚
-â”‚  + MongoDB Atlas        â”‚         â”‚                                  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-```
-
-- **Model API** â€” a standalone Python service on Hugging Face Spaces that loads YOLOv8m + YuNet, performs detection, and returns results via HTTP.
-- **Web App** â€” this Flask app. It does NOT run any ML models locally. It sends images to the Model API, receives results, and handles the UI, storage, and admin panel.
 
 ---
 
 ## Features
 
-- **Remote detection engine** â€” sends images to a Hugging Face Spaces model API running YOLOv8m (body detection) + YuNet (face detection)
-- **Upload or capture** â€” users can upload an image file or take a photo directly from their device camera
-- **Annotated output** â€” bounding boxes, confidence badges, and a people-count banner are drawn on every processed image (by the model API)
-- **Cloud storage** â€” annotated images uploaded to Cloudinary CDN; URLs stored permanently in MongoDB Atlas
-- **Admin dashboard** â€” analytics (totals, averages, per-event stats, daily chart), photo gallery with lightbox, place management, record editing
-- **Place management** â€” create, rename, and delete places/events from the admin panel
-- **Persistent across deploys** â€” MongoDB Atlas stores all records and events; Cloudinary stores all images
+- **Dual detection engine** ÔÇö YOLOv8m for full-body detection (any angle) + YuNet for face detection (catches people partially obscured)
+- **Upload or capture** ÔÇö users can upload an image file or take a photo directly from their device camera
+- **Annotated output** ÔÇö bounding boxes, confidence badges, and a people-count banner are drawn on every processed image
+- **Cloud storage** ÔÇö annotated images uploaded to Cloudinary CDN; URLs stored permanently in MongoDB Atlas
+- **Admin dashboard** ÔÇö analytics (totals, averages, per-event stats, daily chart), photo gallery with lightbox, place management, record editing
+- **Place management** ÔÇö create, rename, and delete places/events from the admin panel
+- **Persistent across deploys** ÔÇö MongoDB Atlas stores all records and events; Cloudinary stores all images
 
 ---
 
@@ -63,12 +36,13 @@ IPS Tech Community uses a **two-service architecture**:
 |---|---|
 | Web framework | Flask 3.0 |
 | Production server | Gunicorn 22 |
-| Detection API | Hugging Face Spaces (YOLOv8m + YuNet) |
-| HTTP client | Requests |
+| Body detection | YOLOv8m (Ultralytics) |
+| Face detection | YuNet (OpenCV) |
+| Deep learning backend | PyTorch 2.2.2 |
+| Image processing | OpenCV (headless), Pillow |
 | Database | MongoDB Atlas (pymongo) |
 | Image CDN | Cloudinary |
-| Deployment (Web App) | Render (Docker) |
-| Deployment (Model) | Hugging Face Spaces (Docker) |
+| Deployment | Render (Docker) |
 
 ---
 
@@ -76,31 +50,35 @@ IPS Tech Community uses a **two-service architecture**:
 
 ```
 crowd_detection2/
-â”‚
-â”œâ”€â”€ app.py                  # Flask routes and application logic
-â”œâ”€â”€ detection.py            # HTTP client â€” sends images to HF model API
-â”œâ”€â”€ db.py                   # MongoDB Atlas access layer
-â”œâ”€â”€ config.py               # App configuration and constants
-â”œâ”€â”€ requirements.txt        # Python dependencies
-â”œâ”€â”€ Dockerfile              # Container definition for Render
-â”‚
-â”œâ”€â”€ static/
-â”‚   â”œâ”€â”€ css/style.css       # Application styles
-â”‚   â””â”€â”€ js/
-â”‚       â”œâ”€â”€ camera.js       # Camera capture & upload logic
-â”‚       â””â”€â”€ dialogs.js      # Custom alert/confirm dialogs
-â”‚
-â”œâ”€â”€ templates/
-â”‚   â”œâ”€â”€ base.html           # Base layout with navbar
-â”‚   â”œâ”€â”€ upload.html         # Public upload page
-â”‚   â””â”€â”€ admin/
-â”‚       â”œâ”€â”€ login.html      # Admin login
-â”‚       â”œâ”€â”€ dashboard.html  # Analytics dashboard
-â”‚       â”œâ”€â”€ photos.html     # Photo gallery with lightbox
-â”‚       â”œâ”€â”€ places.html     # Place management
-â”‚       â””â”€â”€ edit_record.html
-â”‚
-â””â”€â”€ uploads/                # Temporary folder (files deleted after detection)
+Ôöé
+Ôö£ÔöÇÔöÇ app.py                  # Flask routes and application logic
+Ôö£ÔöÇÔöÇ detection.py            # YOLO + YuNet detection pipeline
+Ôö£ÔöÇÔöÇ db.py                   # MongoDB Atlas access layer
+Ôö£ÔöÇÔöÇ config.py               # App configuration and constants
+Ôö£ÔöÇÔöÇ requirements.txt        # Python dependencies
+Ôö£ÔöÇÔöÇ Dockerfile              # Container definition for Render
+Ôöé
+Ôö£ÔöÇÔöÇ models/
+Ôöé   Ôö£ÔöÇÔöÇ yolov8m.pt                          # YOLOv8 medium model (body detection)
+Ôöé   ÔööÔöÇÔöÇ face_detection_yunet_2023mar.onnx   # YuNet model (face detection)
+Ôöé
+Ôö£ÔöÇÔöÇ static/
+Ôöé   Ôö£ÔöÇÔöÇ css/style.css       # Application styles
+Ôöé   ÔööÔöÇÔöÇ js/
+Ôöé       Ôö£ÔöÇÔöÇ camera.js       # Camera capture logic
+Ôöé       ÔööÔöÇÔöÇ dialogs.js      # Upload form dialogs
+Ôöé
+Ôö£ÔöÇÔöÇ templates/
+Ôöé   Ôö£ÔöÇÔöÇ base.html           # Base layout with navbar
+Ôöé   Ôö£ÔöÇÔöÇ upload.html         # Public upload page
+Ôöé   ÔööÔöÇÔöÇ admin/
+Ôöé       Ôö£ÔöÇÔöÇ login.html      # Admin login
+Ôöé       Ôö£ÔöÇÔöÇ dashboard.html  # Analytics dashboard
+Ôöé       Ôö£ÔöÇÔöÇ photos.html     # Photo gallery with lightbox
+Ôöé       Ôö£ÔöÇÔöÇ places.html     # Place management
+Ôöé       ÔööÔöÇÔöÇ edit_record.html
+Ôöé
+ÔööÔöÇÔöÇ uploads/                # Temporary folder (files deleted after detection)
 ```
 
 ---
@@ -111,341 +89,38 @@ crowd_detection2/
 
 ```
 User uploads image
-       â”‚
-       â–¼
+       Ôöé
+       Ôû+
 Saved temporarily to disk (uploads/)
-       â”‚
-       â–¼
-Image sent via HTTP POST to HF Spaces Model API (/detect)
-       â”‚
-       â–¼
-Model API runs YOLOv8m (body detection) + YuNet (face detection)
-       â”‚
-       â–¼
-Model API merges results, draws annotations, returns JSON:
-  { "head_count": N, "annotated_image": "<base64 JPEG>" }
-       â”‚
-       â–¼
-Flask app decodes base64 annotated image
-       â”‚
-       â–¼
+       Ôöé
+       Ôû+
+YOLOv8m ÔÇö detects full bodies (conf ÔëÑ 0.25, imgsz=640)
+       Ôöé
+       Ôû+
+YuNet ÔÇö detects faces (catches partially visible people)
+       Ôöé
+       Ôû+
+Merge results ÔÇö face detections already covered by a body box are dropped
+       Ôöé
+       Ôû+
+Draw bounding boxes + confidence badges + people count banner
+       Ôöé
+       Ôû+
+Encode annotated image to JPEG bytes (in memory ÔÇö no disk write)
+       Ôöé
+       Ôû+
 Delete original temp file from disk
-       â”‚
-       â–¼
-Upload annotated bytes â†’ Cloudinary (permanent CDN URL)
-       â”‚
-       â–¼
-Save record (event, count, Cloudinary URL, timestamp) â†’ MongoDB Atlas
+       Ôöé
+       Ôû+
+Upload annotated bytes ÔåÆ Cloudinary (permanent CDN URL)
+       Ôöé
+       Ôû+
+Save record (event, count, Cloudinary URL, timestamp) ÔåÆ MongoDB Atlas
 ```
 
----
+### Model Caching
 
-## Deploying the Model API on Hugging Face Spaces
-
-This section walks you through creating a **standalone model API** on Hugging Face Spaces that runs YOLOv8 + YuNet detection and exposes an HTTP endpoint.
-
-### Prerequisites
-
-- A free [Hugging Face](https://huggingface.co) account
-- Your model files:
-  - `yolov8m.pt` (YOLOv8 medium â€” body detection)
-  - `face_detection_yunet_2023mar.onnx` (YuNet â€” face detection)
-
-### Step 1: Create a New Hugging Face Space
-
-1. Go to [huggingface.co/new-space](https://huggingface.co/new-space)
-2. Fill in the form:
-   - **Owner**: your HF username (e.g., `mourishantony`)
-   - **Space name**: `crowd-detection-model`
-   - **License**: choose one (e.g., MIT)
-   - **SDK**: select **Docker**
-   - **Visibility**: Public (or Private if you prefer)
-3. Click **Create Space**
-
-### Step 2: Clone the Space Locally
-
-```bash
-git clone https://huggingface.co/spaces/<your-username>/crowd-detection-model
-cd crowd-detection-model
-```
-
-> Replace `<your-username>` with your actual Hugging Face username.
-
-### Step 3: Create the Model API Files
-
-You need to create **4 files** inside the cloned Space folder:
-
-#### 3a. `app.py` â€” FastAPI server with detection logic
-
-```python
-import base64
-import io
-import os
-import cv2
-import numpy as np
-from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import JSONResponse
-from ultralytics import YOLO
-
-app = FastAPI()
-
-# â”€â”€ Load models once at startup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-YOLO_MODEL_PATH = "yolov8m.pt"
-YUNET_MODEL_PATH = "face_detection_yunet_2023mar.onnx"
-
-_yolo = YOLO(YOLO_MODEL_PATH)
-
-def _get_yunet(width, height):
-    detector = cv2.FaceDetectorYN.create(YUNET_MODEL_PATH, "", (width, height))
-    detector.setScoreThreshold(0.5)
-    return detector
-
-
-def _iou(boxA, boxB):
-    xA = max(boxA[0], boxB[0])
-    yA = max(boxA[1], boxB[1])
-    xB = min(boxA[2], boxB[2])
-    yB = min(boxA[3], boxB[3])
-    inter = max(0, xB - xA) * max(0, yB - yA)
-    areaA = (boxA[2] - boxA[0]) * (boxA[3] - boxA[1])
-    areaB = (boxB[2] - boxB[0]) * (boxB[3] - boxB[1])
-    union = areaA + areaB - inter
-    return inter / union if union > 0 else 0
-
-
-def _detect(image_bytes: bytes):
-    """Run YOLO + YuNet on raw image bytes. Return (head_count, annotated_jpeg_bytes)."""
-    arr = np.frombuffer(image_bytes, dtype=np.uint8)
-    img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
-    if img is None:
-        raise ValueError("Could not decode image")
-
-    h, w = img.shape[:2]
-    annotated = img.copy()
-
-    # â”€â”€ YOLO (person class = 0) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    results = _yolo.predict(img, conf=0.25, imgsz=640, verbose=False)
-    yolo_boxes = []
-    for r in results:
-        for box in r.boxes:
-            if int(box.cls[0]) == 0:  # person
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
-                conf = float(box.conf[0])
-                yolo_boxes.append((x1, y1, x2, y2, conf))
-
-    # â”€â”€ YuNet (face detection) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    yunet = _get_yunet(w, h)
-    _, faces = yunet.detect(img)
-    face_boxes = []
-    if faces is not None:
-        for face in faces:
-            fx, fy, fw, fh = int(face[0]), int(face[1]), int(face[2]), int(face[3])
-            fconf = float(face[-1])
-            face_boxes.append((fx, fy, fx + fw, fy + fh, fconf))
-
-    # â”€â”€ Merge: drop face boxes that overlap a YOLO body box â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    extra_faces = []
-    for fb in face_boxes:
-        covered = any(_iou(fb[:4], yb[:4]) > 0.3 for yb in yolo_boxes)
-        if not covered:
-            extra_faces.append(fb)
-
-    all_detections = yolo_boxes + extra_faces
-    head_count = len(all_detections)
-
-    # â”€â”€ Draw annotations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    for i, (x1, y1, x2, y2, conf) in enumerate(yolo_boxes):
-        cv2.rectangle(annotated, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        label = f"Person {conf:.0%}"
-        (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-        cv2.rectangle(annotated, (x1, y1 - th - 8), (x1 + tw + 8, y1), (0, 255, 0), -1)
-        cv2.putText(annotated, label, (x1 + 4, y1 - 4),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-
-    for (x1, y1, x2, y2, conf) in extra_faces:
-        cv2.rectangle(annotated, (x1, y1), (x2, y2), (255, 0, 0), 2)
-        label = f"Face {conf:.0%}"
-        (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-        cv2.rectangle(annotated, (x1, y1 - th - 8), (x1 + tw + 8, y1), (255, 0, 0), -1)
-        cv2.putText(annotated, label, (x1 + 4, y1 - 4),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
-
-    # â”€â”€ People count banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    banner = f"People Count: {head_count}"
-    (tw, th), _ = cv2.getTextSize(banner, cv2.FONT_HERSHEY_SIMPLEX, 1.0, 2)
-    cv2.rectangle(annotated, (10, 10), (20 + tw + 10, 20 + th + 10), (0, 0, 0), -1)
-    cv2.putText(annotated, banner, (20, 20 + th),
-                cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 255), 2, cv2.LINE_AA)
-
-    # â”€â”€ Encode to JPEG bytes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    _, buf = cv2.imencode(".jpg", annotated, [cv2.IMWRITE_JPEG_QUALITY, 92])
-    return head_count, buf.tobytes()
-
-
-# â”€â”€ API Endpoint â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-@app.post("/detect")
-async def detect(image: UploadFile = File(...)):
-    contents = await image.read()
-    try:
-        head_count, annotated_bytes = _detect(contents)
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
-
-    encoded = base64.b64encode(annotated_bytes).decode("utf-8")
-    return {"head_count": head_count, "annotated_image": encoded}
-
-
-@app.get("/")
-def root():
-    return {"status": "ok", "message": "Crowd Detection Model API. POST an image to /detect"}
-```
-
-#### 3b. `requirements.txt` â€” Model API dependencies
-
-```
-fastapi==0.115.0
-uvicorn[standard]==0.30.0
-python-multipart==0.0.9
-ultralytics==8.2.0
-opencv-python-headless==4.10.0.84
-numpy==1.26.4
-torch==2.2.2
-torchvision==0.17.2
-```
-
-#### 3c. `Dockerfile` â€” Container definition for HF Spaces
-
-```dockerfile
-FROM python:3.11-slim
-
-# Install system dependencies for OpenCV
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1-mesa-glx libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-# Install Python dependencies first (cache layer)
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code and model files
-COPY . .
-
-# HF Spaces expects port 7860
-EXPOSE 7860
-
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
-```
-
-#### 3d. `README.md` â€” Space metadata (required by HF)
-
-```yaml
----
-title: Crowd Detection Model
-emoji: ğŸ‘¥
-colorFrom: blue
-colorTo: green
-sdk: docker
-app_port: 7860
-pinned: false
----
-```
-
-### Step 4: Add Your Model Files
-
-Copy your model weights into the Space folder:
-
-```bash
-# From your main project directory
-cp models/yolov8m.pt  ../crowd-detection-model/
-cp models/face_detection_yunet_2023mar.onnx  ../crowd-detection-model/
-```
-
-Your Space folder should now look like:
-
-```
-crowd-detection-model/
-â”œâ”€â”€ app.py
-â”œâ”€â”€ Dockerfile
-â”œâ”€â”€ README.md
-â”œâ”€â”€ requirements.txt
-â”œâ”€â”€ yolov8m.pt
-â””â”€â”€ face_detection_yunet_2023mar.onnx
-```
-
-### Step 5: Push to Hugging Face
-
-```bash
-cd crowd-detection-model
-
-# If not logged in, authenticate first:
-# pip install huggingface_hub
-# huggingface-cli login
-# (paste your HF access token when prompted)
-
-git add .
-git commit -m "Initial model API deployment"
-git push
-```
-
-### Step 6: Wait for the Build
-
-1. Go to your Space page: `https://huggingface.co/spaces/<your-username>/crowd-detection-model`
-2. Click the **"Building"** status to watch logs
-3. First build downloads PyTorch (~2GB) â€” this can take **5â€“10 minutes**
-4. Once running, you'll see: `{"status": "ok", "message": "Crowd Detection Model API..."}`
-
-### Step 7: Test the Model API
-
-```bash
-# Test with curl
-curl -X POST "https://<your-username>-crowd-detection-model.hf.space/detect" \
-     -F "image=@test_image.jpg"
-```
-
-Expected response:
-```json
-{
-  "head_count": 15,
-  "annotated_image": "/9j/4AAQSkZJRg..."
-}
-```
-
-### Step 8: Connect the Web App
-
-Set the `MODEL_API_URL` environment variable in your Flask web app to point to the Space:
-
-```
-MODEL_API_URL=https://<your-username>-crowd-detection-model.hf.space/detect
-```
-
-Your `detection.py` already uses this variable â€” the web app will now send images to your HF Space.
-
-### Hugging Face Spaces â€” Important Notes
-
-| Topic | Detail |
-|---|---|
-| **Free tier** | 2 vCPU, 16GB RAM â€” sufficient for YOLOv8m inference |
-| **Cold starts** | Free Spaces sleep after ~48 hours of inactivity. First request after sleep takes 1â€“3 minutes (container rebuild). Upgrade to a persistent Space ($0/month with HF Pro) to avoid this |
-| **Model file size** | Git LFS is used automatically for files >10MB. HF handles this â€” just `git push` |
-| **Timeout** | Default request timeout is 60s. For large images, processing stays well within this |
-| **Logs** | View live logs on your Space page â†’ **Logs** tab |
-| **Secrets** | If you need env vars in the model Space, add them in Space **Settings â†’ Variables and secrets** |
-| **Custom domain** | Available for paid Spaces |
-
-### Troubleshooting HF Spaces
-
-| Issue | Solution |
-|---|---|
-| Build fails with OOM | PyTorch is large. Use `python:3.11-slim` base and `--no-cache-dir` |
-| `No module named 'cv2'` | Ensure `libgl1-mesa-glx` and `libglib2.0-0` are in the Dockerfile |
-| Space won't start | Check the **Logs** tab. Common: wrong port (must be 7860), missing model file |
-| Model returns 500 | Test locally first with `uvicorn app:app --port 7860`, send an image to `/detect` |
-| Slow first request | Cold start. The model loads into memory on the first request after Space wakes |
-| Git push rejected (LFS) | Run `git lfs install` then `git lfs track "*.pt" "*.onnx"` before committing |
+The YOLOv8 model is loaded **once** at application startup into a module-level singleton (`_yolo_model`). Subsequent requests reuse the cached model ÔÇö no disk I/O per request.
 
 ---
 
@@ -456,7 +131,6 @@ Your `detection.py` already uses this variable â€” the web app will now send ima
 - Python 3.11+
 - A [MongoDB Atlas](https://www.mongodb.com/atlas) free cluster
 - A [Cloudinary](https://cloudinary.com) free account
-- A running Model API (see [Deploying the Model API on Hugging Face Spaces](#deploying-the-model-api-on-hugging-face-spaces))
 
 ### 1. Clone and create virtual environment
 
@@ -483,7 +157,16 @@ MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/?retryWrites=t
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
-MODEL_API_URL=https://<your-username>-crowd-detection-model.hf.space/detect
+```
+
+Then load it before running:
+
+```bash
+# Windows PowerShell
+$env:MONGODB_URI="mongodb+srv://..."
+$env:CLOUDINARY_CLOUD_NAME="..."
+$env:CLOUDINARY_API_KEY="..."
+$env:CLOUDINARY_API_SECRET="..."
 ```
 
 ### 4. Run the app
@@ -504,11 +187,10 @@ Visit `http://localhost:5000`
 | `CLOUDINARY_CLOUD_NAME` | Yes | Cloudinary cloud name |
 | `CLOUDINARY_API_KEY` | Yes | Cloudinary API key |
 | `CLOUDINARY_API_SECRET` | Yes | Cloudinary API secret |
-| `MODEL_API_URL` | Yes | Full URL to the HF Spaces model API `/detect` endpoint |
 
 ---
 
-## Deploying the Web App to Render
+## Deploying to Render
 
 ### 1. Push your code to GitHub
 
@@ -520,13 +202,13 @@ git push
 
 ### 2. Create a Render Web Service
 
-1. Go to [render.com](https://render.com) â†’ **New â†’ Web Service**
+1. Go to [render.com](https://render.com) ÔåÆ **New ÔåÆ Web Service**
 2. Connect your GitHub repository
 3. Render auto-detects the `Dockerfile`
 
 ### 3. Add environment variables on Render
 
-In your service â†’ **Environment** tab, add all five variables from the table above.
+In your service ÔåÆ **Environment** tab, add all four variables from the table above.
 
 ### 4. Deploy
 
@@ -534,11 +216,11 @@ Render will build the Docker image and deploy automatically on every push to `ma
 
 The `Dockerfile` runs:
 ```
-gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 300
+gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
 ```
 
-- `--workers 1` â€” keeps memory usage low on free tier
-- `--timeout 300` â€” allows enough time for the model API to process (including HF Space cold starts)
+- `--workers 1` ÔÇö prevents two workers loading the 50MB PyTorch model simultaneously (RAM limit on free tier)
+- `--timeout 120` ÔÇö allows 120 seconds for the first request (model loads once on first upload)
 
 ---
 
@@ -563,7 +245,7 @@ Password: kgadmin@2026
 
 ## API Reference
 
-### `POST /upload` (Web App)
+### `POST /upload`
 
 Upload an image for crowd detection.
 
@@ -591,31 +273,11 @@ Upload an image for crowd detection.
 }
 ```
 
-### `POST /detect` (Model API on HF Spaces)
-
-Send an image to the model API for detection.
-
-**Form field:**
-
-| Field | Type | Description |
-|---|---|---|
-| `image` | file | Image file (any common format) |
-
-**Response:**
-```json
-{
-  "head_count": 15,
-  "annotated_image": "<base64-encoded JPEG>"
-}
-```
-
 ---
 
 ## Notes
 
-- The **web app does NOT run any ML models locally** â€” all detection is done by the remote HF Spaces model API
-- The original uploaded image is **never stored permanently** â€” it is deleted from disk immediately after being sent to the model API
+- The original uploaded image is **never stored permanently** ÔÇö it is deleted from disk immediately after detection runs
 - Only the annotated image (with bounding boxes drawn) is stored, on Cloudinary
 - MongoDB stores: event name, Cloudinary URL, Cloudinary public ID (for deletion), head count, and timestamp
-- The `uploads/` folder is used only as a temporary scratch space
-- If the HF Space is sleeping (free tier), the first request after inactivity may take 1â€“3 minutes while the container restarts
+- The `uploads/` folder is used only as a temporary scratch space during detection
