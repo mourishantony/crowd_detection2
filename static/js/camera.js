@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
             closeCameraBtn.style.display = 'inline-block';
             openCameraBtn.style.display = 'none';
         } catch (err) {
-            IPS Tech CommunityAlert('Could not access camera: ' + err.message, 'error');
+            ipsAlert('Could not access camera: ' + err.message, 'error');
         }
     });
 
@@ -171,12 +171,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Validate place
         const place = placeInput ? placeInput.value.trim() : '';
         if (!place) {
-            IPS Tech CommunityAlert('Please enter or select a place.', 'error');
+            ipsAlert('Please enter or select a place.', 'error');
             return;
         }
 
         if (!imageInput.files || imageInput.files.length === 0) {
-            IPS Tech CommunityAlert('Please select or capture an image first.', 'error');
+            ipsAlert('Please select or capture an image first.', 'error');
             return;
         }
 
@@ -203,12 +203,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     successMessage.style.display = 'none';
                 }, 2000);
             } else {
-                IPS Tech CommunityAlert(data.error || 'An error occurred.', 'error');
+                ipsAlert(data.error || 'An error occurred.', 'error');
             }
         } catch (err) {
             loadingOverlay.style.display = 'none';
             submitBtn.disabled = false;
-            IPS Tech CommunityAlert('Upload failed: ' + err.message, 'error');
+            ipsAlert('Upload failed: ' + err.message, 'error');
         }
     });
 });

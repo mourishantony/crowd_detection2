@@ -6,9 +6,9 @@
 (function () {
     // ── Inject dialog HTML once ──────────────────────────────────────
     function ensureContainer() {
-        if (document.getElementById('IPS Tech Community-dialog-container')) return;
+        if (document.getElementById('ips-dialog-container')) return;
         const div = document.createElement('div');
-        div.id = 'IPS Tech Community-dialog-container';
+        div.id = 'ips-dialog-container';
         div.innerHTML = `
             <!-- Alert Dialog -->
             <div class="ph-overlay" id="ph-alert-overlay">
@@ -39,8 +39,8 @@
         document.body.appendChild(div);
     }
 
-    // ── IPS Tech CommunityAlert ─────────────────────────────────────────────────
-    window.IPS Tech CommunityAlert = function (message, type) {
+    // ── ipsAlert ─────────────────────────────────────────────────
+    window.ipsAlert = function (message, type) {
         ensureContainer();
         type = type || 'error'; // 'error', 'success', 'info'
 
@@ -76,8 +76,8 @@
         });
     };
 
-    // ── IPS Tech CommunityConfirm ───────────────────────────────────────────────
-    window.IPS Tech CommunityConfirm = function (message, okLabel) {
+    // ── ipsConfirm ───────────────────────────────────────────────
+    window.ipsConfirm = function (message, okLabel) {
         ensureContainer();
         const overlay  = document.getElementById('ph-confirm-overlay');
         const msgEl    = document.getElementById('ph-confirm-msg');
@@ -111,7 +111,7 @@
                 e.preventDefault();
                 const msg = form.dataset.confirm;
                 const label = form.dataset.confirmLabel || 'Delete';
-                const ok = await IPS Tech CommunityConfirm(msg, label);
+                const ok = await ipsConfirm(msg, label);
                 if (ok) form.submit();
             });
         });
