@@ -7,9 +7,14 @@ from datetime import datetime
 from flask import (Flask, render_template, request, redirect,
                    url_for, session, flash, jsonify)
 from werkzeug.utils import secure_filename
+from PIL import Image
+import pillow_heif
 import config
 import db
 from detection import count_people
+
+# Register HEIF/HEIC opener with Pillow
+pillow_heif.register_heif_opener()
 
 cloudinary.config(
     cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
@@ -57,13 +62,29 @@ def upload():
         return jsonify({"success": False, "error": "No image selected."}), 400
 
     if not allowed_file(file.filename):
-        return jsonify({"success": False, "error": "Invalid file type. Use JPG, PNG, BMP, or WEBP."}), 400
+        return jsonify({"success": False, "error": "Invalid file type. Use JPG, PNG, BMP, WEBP, TIFF, or HEIC."}), 400
 
     # Save uploaded image temporarily for detection
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"{timestamp}_{secure_filename(file.filename)}"
-    filepath = os.path.join(config.UPLOAD_FOLDER, filename)
+    original_filename = secure_filename(file.filename)
+    ext = original_filename.rsplit(".", 1)[1].lower() if "." in original_filename else ""
+    filepath = os.path.join(config.UPLOAD_FOLDER, f"{timestamp}_{original_filename}")
     file.save(filepath)
+
+    # Convert HEIC/HEIF to JPEG so the detection model can process it
+    if ext in ("heic", "heif"):
+        try:
+            img = Image.open(filepath)
+            jpeg_path = filepath.rsplit(".", 1)[0] + ".jpg"
+            img.convert("RGB").save(jpeg_path, "JPEG", quality=95)
+            os.remove(filepath)
+            filepath = jpeg_path
+        except Exception as e:
+            try:
+                os.remove(filepath)
+            except Exception:
+                pass
+            return jsonify({"success": False, "error": f"Failed to convert HEIC image: {str(e)}"}), 500
 
     # Run detection — returns annotated JPEG bytes in memory
     try:

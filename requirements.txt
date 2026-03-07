@@ -19,4 +19,5 @@ cloudinary>=1.36,<2
 
 # Image processing & numerical computing
 Pillow==11.3.0
+pillow-heif>=0.18.0
 numpy==1.26.4
