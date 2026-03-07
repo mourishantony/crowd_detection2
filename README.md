@@ -1,6 +1,6 @@
-# IPS Tech Community ÔÇö Crowd Detection System
+# IPS Tech Community â€” Crowd Detection System
 
-A Flask web application that counts people in images using YOLOv8 object detection and YuNet face detection. Annotated images are stored permanently on Cloudinary, and all records are persisted in MongoDB Atlas ÔÇö surviving across deployments.
+A Flask web application that counts people in images using YOLOv8 object detection and YuNet face detection. Annotated images are stored permanently on Cloudinary, and all records are persisted in MongoDB Atlas â€” surviving across deployments.
 
 ---
 
@@ -20,13 +20,13 @@ A Flask web application that counts people in images using YOLOv8 object detecti
 
 ## Features
 
-- **Dual detection engine** ÔÇö YOLOv8m for full-body detection (any angle) + YuNet for face detection (catches people partially obscured)
-- **Upload or capture** ÔÇö users can upload an image file or take a photo directly from their device camera
-- **Annotated output** ÔÇö bounding boxes, confidence badges, and a people-count banner are drawn on every processed image
-- **Cloud storage** ÔÇö annotated images uploaded to Cloudinary CDN; URLs stored permanently in MongoDB Atlas
-- **Admin dashboard** ÔÇö analytics (totals, averages, per-event stats, daily chart), photo gallery with lightbox, place management, record editing
-- **Place management** ÔÇö create, rename, and delete places/events from the admin panel
-- **Persistent across deploys** ÔÇö MongoDB Atlas stores all records and events; Cloudinary stores all images
+- **Dual detection engine** â€” YOLOv8m for full-body detection (any angle) + YuNet for face detection (catches people partially obscured)
+- **Upload or capture** â€” users can upload an image file or take a photo directly from their device camera
+- **Annotated output** â€” bounding boxes, confidence badges, and a people-count banner are drawn on every processed image
+- **Cloud storage** â€” annotated images uploaded to Cloudinary CDN; URLs stored permanently in MongoDB Atlas
+- **Admin dashboard** â€” analytics (totals, averages, per-event stats, daily chart), photo gallery with lightbox, place management, record editing
+- **Place management** â€” create, rename, and delete places/events from the admin panel
+- **Persistent across deploys** â€” MongoDB Atlas stores all records and events; Cloudinary stores all images
 
 ---
 
@@ -50,35 +50,35 @@ A Flask web application that counts people in images using YOLOv8 object detecti
 
 ```
 crowd_detection2/
-Ôöé
-Ôö£ÔöÇÔöÇ app.py                  # Flask routes and application logic
-Ôö£ÔöÇÔöÇ detection.py            # YOLO + YuNet detection pipeline
-Ôö£ÔöÇÔöÇ db.py                   # MongoDB Atlas access layer
-Ôö£ÔöÇÔöÇ config.py               # App configuration and constants
-Ôö£ÔöÇÔöÇ requirements.txt        # Python dependencies
-Ôö£ÔöÇÔöÇ Dockerfile              # Container definition for Render
-Ôöé
-Ôö£ÔöÇÔöÇ models/
-Ôöé   Ôö£ÔöÇÔöÇ yolov8m.pt                          # YOLOv8 medium model (body detection)
-Ôöé   ÔööÔöÇÔöÇ face_detection_yunet_2023mar.onnx   # YuNet model (face detection)
-Ôöé
-Ôö£ÔöÇÔöÇ static/
-Ôöé   Ôö£ÔöÇÔöÇ css/style.css       # Application styles
-Ôöé   ÔööÔöÇÔöÇ js/
-Ôöé       Ôö£ÔöÇÔöÇ camera.js       # Camera capture logic
-Ôöé       ÔööÔöÇÔöÇ dialogs.js      # Upload form dialogs
-Ôöé
-Ôö£ÔöÇÔöÇ templates/
-Ôöé   Ôö£ÔöÇÔöÇ base.html           # Base layout with navbar
-Ôöé   Ôö£ÔöÇÔöÇ upload.html         # Public upload page
-Ôöé   ÔööÔöÇÔöÇ admin/
-Ôöé       Ôö£ÔöÇÔöÇ login.html      # Admin login
-Ôöé       Ôö£ÔöÇÔöÇ dashboard.html  # Analytics dashboard
-Ôöé       Ôö£ÔöÇÔöÇ photos.html     # Photo gallery with lightbox
-Ôöé       Ôö£ÔöÇÔöÇ places.html     # Place management
-Ôöé       ÔööÔöÇÔöÇ edit_record.html
-Ôöé
-ÔööÔöÇÔöÇ uploads/                # Temporary folder (files deleted after detection)
+â”‚
+â”œâ”€â”€ app.py                  # Flask routes and application logic
+â”œâ”€â”€ detection.py            # YOLO + YuNet detection pipeline
+â”œâ”€â”€ db.py                   # MongoDB Atlas access layer
+â”œâ”€â”€ config.py               # App configuration and constants
+â”œâ”€â”€ requirements.txt        # Python dependencies
+â”œâ”€â”€ Dockerfile              # Container definition for Render
+â”‚
+â”œâ”€â”€ models/
+â”‚   â”œâ”€â”€ yolov8m.pt                          # YOLOv8 medium model (body detection)
+â”‚   â””â”€â”€ face_detection_yunet_2023mar.onnx   # YuNet model (face detection)
+â”‚
+â”œâ”€â”€ static/
+â”‚   â”œâ”€â”€ css/style.css       # Application styles
+â”‚   â””â”€â”€ js/
+â”‚       â”œâ”€â”€ camera.js       # Camera capture logic
+â”‚       â””â”€â”€ dialogs.js      # Upload form dialogs
+â”‚
+â”œâ”€â”€ templates/
+â”‚   â”œâ”€â”€ base.html           # Base layout with navbar
+â”‚   â”œâ”€â”€ upload.html         # Public upload page
+â”‚   â””â”€â”€ admin/
+â”‚       â”œâ”€â”€ login.html      # Admin login
+â”‚       â”œâ”€â”€ dashboard.html  # Analytics dashboard
+â”‚       â”œâ”€â”€ photos.html     # Photo gallery with lightbox
+â”‚       â”œâ”€â”€ places.html     # Place management
+â”‚       â””â”€â”€ edit_record.html
+â”‚
+â””â”€â”€ uploads/                # Temporary folder (files deleted after detection)
 ```
 
 ---
@@ -89,38 +89,38 @@ crowd_detection2/
 
 ```
 User uploads image
-       Ôöé
-       Ôû+
+       â”‚
+       â–¼
 Saved temporarily to disk (uploads/)
-       Ôöé
-       Ôû+
-YOLOv8m ÔÇö detects full bodies (conf ÔëÑ 0.25, imgsz=640)
-       Ôöé
-       Ôû+
-YuNet ÔÇö detects faces (catches partially visible people)
-       Ôöé
-       Ôû+
-Merge results ÔÇö face detections already covered by a body box are dropped
-       Ôöé
-       Ôû+
+       â”‚
+       â–¼
+YOLOv8m â€” detects full bodies (conf â‰¥ 0.25, imgsz=640)
+       â”‚
+       â–¼
+YuNet â€” detects faces (catches partially visible people)
+       â”‚
+       â–¼
+Merge results â€” face detections already covered by a body box are dropped
+       â”‚
+       â–¼
 Draw bounding boxes + confidence badges + people count banner
-       Ôöé
-       Ôû+
-Encode annotated image to JPEG bytes (in memory ÔÇö no disk write)
-       Ôöé
-       Ôû+
+       â”‚
+       â–¼
+Encode annotated image to JPEG bytes (in memory â€” no disk write)
+       â”‚
+       â–¼
 Delete original temp file from disk
-       Ôöé
-       Ôû+
-Upload annotated bytes ÔåÆ Cloudinary (permanent CDN URL)
-       Ôöé
-       Ôû+
-Save record (event, count, Cloudinary URL, timestamp) ÔåÆ MongoDB Atlas
+       â”‚
+       â–¼
+Upload annotated bytes â†’ Cloudinary (permanent CDN URL)
+       â”‚
+       â–¼
+Save record (event, count, Cloudinary URL, timestamp) â†’ MongoDB Atlas
 ```
 
 ### Model Caching
 
-The YOLOv8 model is loaded **once** at application startup into a module-level singleton (`_yolo_model`). Subsequent requests reuse the cached model ÔÇö no disk I/O per request.
+The YOLOv8 model is loaded **once** at application startup into a module-level singleton (`_yolo_model`). Subsequent requests reuse the cached model â€” no disk I/O per request.
 
 ---
 
@@ -202,13 +202,13 @@ git push
 
 ### 2. Create a Render Web Service
 
-1. Go to [render.com](https://render.com) ÔåÆ **New ÔåÆ Web Service**
+1. Go to [render.com](https://render.com) â†’ **New â†’ Web Service**
 2. Connect your GitHub repository
 3. Render auto-detects the `Dockerfile`
 
 ### 3. Add environment variables on Render
 
-In your service ÔåÆ **Environment** tab, add all four variables from the table above.
+In your service â†’ **Environment** tab, add all four variables from the table above.
 
 ### 4. Deploy
 
@@ -219,8 +219,8 @@ The `Dockerfile` runs:
 gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
 ```
 
-- `--workers 1` ÔÇö prevents two workers loading the 50MB PyTorch model simultaneously (RAM limit on free tier)
-- `--timeout 120` ÔÇö allows 120 seconds for the first request (model loads once on first upload)
+- `--workers 1` â€” prevents two workers loading the 50MB PyTorch model simultaneously (RAM limit on free tier)
+- `--timeout 120` â€” allows 120 seconds for the first request (model loads once on first upload)
 
 ---
 
@@ -277,7 +277,7 @@ Upload an image for crowd detection.
 
 ## Notes
 
-- The original uploaded image is **never stored permanently** ÔÇö it is deleted from disk immediately after detection runs
+- The original uploaded image is **never stored permanently** â€” it is deleted from disk immediately after detection runs
 - Only the annotated image (with bounding boxes drawn) is stored, on Cloudinary
 - MongoDB stores: event name, Cloudinary URL, Cloudinary public ID (for deletion), head count, and timestamp
 - The `uploads/` folder is used only as a temporary scratch space during detection
