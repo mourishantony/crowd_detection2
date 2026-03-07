@@ -33,7 +33,7 @@ def save_records(records):
 
 # ── Events ───────────────────────────────────────────────────────────────────
 
-_DEFAULT_EVENTS = []
+_DEFAULT_EVENTS = ["Place 1", "Place 2", "Place 3"]
 
 
 def load_events():
@@ -41,6 +41,7 @@ def load_events():
     doc = db.settings.find_one({"key": "events"})
     if doc:
         return doc["value"]
+    save_events(_DEFAULT_EVENTS)
     return _DEFAULT_EVENTS
 
 
