@@ -18,6 +18,6 @@ YUNET_MODEL = os.path.join(MODELS_FOLDER, "face_detection_yunet_2023mar.onnx")
 YUNET_URL = "https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx"
 
 # Allowed image extensions
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "bmp", "webp", "tiff"}
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "bmp", "webp", "tiff","heic"}
 
 
