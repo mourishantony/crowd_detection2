@@ -1,5 +1,11 @@
 FROM python:3.11-slim
 
+# Install runtime libraries needed by pillow-heif (HEIC/HEIF image support)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libffi-dev \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY . /app
 WORKDIR /app
 

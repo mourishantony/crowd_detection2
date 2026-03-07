@@ -8,13 +8,15 @@ from flask import (Flask, render_template, request, redirect,
                    url_for, session, flash, jsonify)
 from werkzeug.utils import secure_filename
 from PIL import Image
-import pillow_heif
+try:
+    import pillow_heif
+    pillow_heif.register_heif_opener()
+    HEIC_SUPPORTED = True
+except ImportError:
+    HEIC_SUPPORTED = False
 import config
 import db
 from detection import count_people
-
-# Register HEIF/HEIC opener with Pillow
-pillow_heif.register_heif_opener()
 
 cloudinary.config(
     cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
@@ -73,6 +75,12 @@ def upload():
 
     # Convert HEIC/HEIF to JPEG so the detection model can process it
     if ext in ("heic", "heif"):
+        if not HEIC_SUPPORTED:
+            try:
+                os.remove(filepath)
+            except Exception:
+                pass
+            return jsonify({"success": False, "error": "HEIC support is not available on this server. Please convert the image to JPEG first."}), 400
         try:
             img = Image.open(filepath)
             jpeg_path = filepath.rsplit(".", 1)[0] + ".jpg"

@@ -85,21 +85,51 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadArea.style.borderColor = '#d1d5db';
     });
 
-    uploadArea.addEventListener('drop', (e) => {
+    uploadArea.addEventListener('drop', async (e) => {
         e.preventDefault();
         uploadArea.style.borderColor = '#d1d5db';
         if (e.dataTransfer.files.length > 0) {
-            imageInput.files = e.dataTransfer.files;
-            showPreview(e.dataTransfer.files[0]);
+            let file = e.dataTransfer.files[0];
+            file = await convertHeicIfNeeded(file);
+            setFileInput(file);
+            showPreview(file);
         }
     });
 
     // File selected
-    imageInput.addEventListener('change', () => {
+    imageInput.addEventListener('change', async () => {
         if (imageInput.files.length > 0) {
-            showPreview(imageInput.files[0]);
+            let file = imageInput.files[0];
+            file = await convertHeicIfNeeded(file);
+            setFileInput(file);
+            showPreview(file);
         }
     });
+
+    // Convert HEIC/HEIF to JPEG in the browser before uploading
+    async function convertHeicIfNeeded(file) {
+        const name = file.name.toLowerCase();
+        const isHeic = name.endsWith('.heic') || name.endsWith('.heif') ||
+                       file.type === 'image/heic' || file.type === 'image/heif';
+        if (!isHeic || typeof heic2any === 'undefined') return file;
+
+        try {
+            const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.92 });
+            const converted = Array.isArray(blob) ? blob[0] : blob;
+            const newName = file.name.replace(/\.heic$|\.heif$/i, '.jpg');
+            return new File([converted], newName, { type: 'image/jpeg' });
+        } catch (e) {
+            console.warn('Client-side HEIC conversion failed, uploading original:', e);
+            return file;
+        }
+    }
+
+    // Replace the file in the input element
+    function setFileInput(file) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        imageInput.files = dt.files;
+    }
 
     function showPreview(file) {
         const reader = new FileReader();
@@ -190,7 +220,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 body: formData
             });
-            const data = await response.json();
+
+            let data;
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                throw new Error(text || 'Server returned an unexpected response.');
+            }
 
             loadingOverlay.style.display = 'none';
             submitBtn.disabled = false;
