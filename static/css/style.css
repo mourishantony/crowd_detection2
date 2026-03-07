@@ -1627,7 +1627,7 @@ input::placeholder {
     .card, .stat-card, .table-container { box-shadow: none; border: 1px solid #ddd; }
 }
 
-/* ─────────────── Phoenix Dialogs ─────────────── */
+/* ─────────────── IPS Tech Community Dialogs ─────────────── */
 .ph-overlay {
     position: fixed;
     inset: 0;
@@ -1711,7 +1711,7 @@ input::placeholder {
     justify-content: center;
 }
 
-/* Phoenix dialog buttons */
+/* IPS Tech Community dialog buttons */
 .ph-btn {
     padding: 0.55rem 1.4rem;
     border-radius: 8px;

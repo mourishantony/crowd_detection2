@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Phoenix - Crowd Detection System for Cultural Events">
-    <title>{% block title %}Phoenix{% endblock %}</title>
+    <meta name="description" content="IPS Tech Community - Crowd Detection System for Cultural Events">
+    <title>{% block title %}IPS Tech Community{% endblock %}</title>
     
     <!-- Google Fonts - Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +19,7 @@
     <nav class="navbar">
         <div class="nav-brand">
             <img src="{{ url_for('static', filename='images/ips_logo.png') }}" alt="IPS Logo" class="nav-logo">
-            <a href="{{ url_for('index') }}">Phoenix</a>
+            <a href="{{ url_for('index') }}">IPS Tech Community</a>
         </div>
         <div class="nav-links">
             {% if not session.get('admin_logged_in') %}

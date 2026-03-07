@@ -1,14 +1,14 @@
 /**
- * Phoenix Custom Dialogs
+ * IPS Tech Community Custom Dialogs
  * Replaces browser alert() and confirm() with styled modals.
  */
 
 (function () {
     // ── Inject dialog HTML once ──────────────────────────────────────
     function ensureContainer() {
-        if (document.getElementById('phoenix-dialog-container')) return;
+        if (document.getElementById('IPS Tech Community-dialog-container')) return;
         const div = document.createElement('div');
-        div.id = 'phoenix-dialog-container';
+        div.id = 'IPS Tech Community-dialog-container';
         div.innerHTML = `
             <!-- Alert Dialog -->
             <div class="ph-overlay" id="ph-alert-overlay">
@@ -39,8 +39,8 @@
         document.body.appendChild(div);
     }
 
-    // ── PhoenixAlert ─────────────────────────────────────────────────
-    window.PhoenixAlert = function (message, type) {
+    // ── IPS Tech CommunityAlert ─────────────────────────────────────────────────
+    window.IPS Tech CommunityAlert = function (message, type) {
         ensureContainer();
         type = type || 'error'; // 'error', 'success', 'info'
 
@@ -76,8 +76,8 @@
         });
     };
 
-    // ── PhoenixConfirm ───────────────────────────────────────────────
-    window.PhoenixConfirm = function (message, okLabel) {
+    // ── IPS Tech CommunityConfirm ───────────────────────────────────────────────
+    window.IPS Tech CommunityConfirm = function (message, okLabel) {
         ensureContainer();
         const overlay  = document.getElementById('ph-confirm-overlay');
         const msgEl    = document.getElementById('ph-confirm-msg');
@@ -111,7 +111,7 @@
                 e.preventDefault();
                 const msg = form.dataset.confirm;
                 const label = form.dataset.confirmLabel || 'Delete';
-                const ok = await PhoenixConfirm(msg, label);
+                const ok = await IPS Tech CommunityConfirm(msg, label);
                 if (ok) form.submit();
             });
         });
